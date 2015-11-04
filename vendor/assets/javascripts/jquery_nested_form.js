@@ -14,13 +14,7 @@
 
       // Make the context correct by replacing <parents> with the generated ID
       // of each of the parent objects
-      var context = ($(link).closest('.fields').closestChild('input, textarea, select').eq(0).attr('name') || '').replace(/\[[a-z_]+\]$/, '');
-
-      // If the parent has no inputs we need to strip off the last pair
-      var current = content.match(new RegExp('\\[([a-z_]+)\\]\\[new_' + assoc + '\\]'));
-      if (current) {
-        context = context.replace(new RegExp('\\[' + current[1] + '\\]\\[(new_)?\\d+\\]$'), '');
-      }
+      var context = ($(link).closest('.fields').closestChild('input, textarea, select').eq(0).attr('name') || '').replace(new RegExp('\[[a-z_]+\]$'), '');
 
       // context will be something like this for a brand new form:
       // project[tasks_attributes][1255929127459][assignments_attributes][1255929128105]
@@ -28,10 +22,11 @@
       // project[tasks_attributes][0][assignments_attributes][1]
       if (context) {
         var parentNames = context.match(/[a-z_]+_attributes(?=\]\[(new_)?\d+\])/g) || [];
-        var parentIds   = context.match(/[0-9]+/g) || [];
+        var parentIds   = context.match(/\[([0-9]+)\]/g) || [];
 
         for(var i = 0; i < parentNames.length; i++) {
           if(parentIds[i]) {
+            parentIds[i] = parentIds[i].slice(1, -1)
             content = content.replace(
               new RegExp('(_' + parentNames[i] + ')_.+?_', 'g'),
               '$1_' + parentIds[i] + '_');
